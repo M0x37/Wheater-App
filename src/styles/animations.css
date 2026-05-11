@@ -1,0 +1,22 @@
+/* Screen transitions */
+.screen-enter {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.screen-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.screen-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.screen-exit-active {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}

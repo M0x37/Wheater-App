@@ -1,0 +1,204 @@
+@import './variables.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-mono);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+
+.app-container {
+  max-width: var(--app-max-width);
+  width: 100%;
+  min-height: 100vh;
+  padding: var(--app-padding-top) var(--app-padding-sides) var(--app-padding-bottom);
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+/* Typography classes */
+.nav-button {
+  font-size: 12px;
+  color: var(--text-very-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.1s ease;
+}
+
+.nav-button:hover {
+  color: var(--text-dim);
+}
+
+.nav-button.active {
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--active-underline);
+  padding-bottom: 2px;
+}
+
+.location-text {
+  font-size: 15px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.big-temperature {
+  font-size: 72px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.condition-label {
+  font-size: 13px;
+  color: var(--text-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.meta-label {
+  font-size: 10px;
+  color: var(--text-label);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.grid-header {
+  font-size: 10px;
+  color: var(--text-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.time-label {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.temp-value {
+  font-size: 14px;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.feels-value {
+  font-size: 14px;
+  color: var(--accent-cold);
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+
+.hourly-time {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.week-day {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.week-condition {
+  font-size: 12px;
+  color: var(--text-label);
+  letter-spacing: 0.05em;
+}
+
+.week-high {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+.week-low {
+  font-size: 14px;
+  color: var(--accent-cold);
+  text-align: right;
+}
+
+.section-header {
+  font-size: 10px;
+  color: var(--text-label);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Utility classes */
+.divider {
+  border-top: 1px solid var(--divider);
+  margin: 0;
+}
+
+.screen-transition-enter {
+  opacity: 0;
+  transform: translateY(var(--screen-transition-offset));
+}
+
+.screen-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--screen-transition-duration) var(--screen-transition-timing),
+              transform var(--screen-transition-duration) var(--screen-transition-timing);
+}
+
+/* Input styling */
+.location-input {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 12px;
+  letter-spacing: 0.05em;
+  outline: none;
+  transition: border-color 0.1s ease;
+}
+
+.location-input:focus {
+  border-color: var(--text-dim);
+}
+
+.location-input::placeholder {
+  color: var(--text-very-dim);
+}
+
+/* Loading and error states */
+.loading-text,
+.error-text {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.error-text {
+  color: var(--accent-warm);
+}

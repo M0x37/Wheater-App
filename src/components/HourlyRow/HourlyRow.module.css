@@ -1,0 +1,48 @@
+.hourlyContainer {
+  margin-bottom: var(--meta-section-margin-bottom);
+}
+
+.hourlyRow {
+  display: grid;
+  grid-template-columns: 60px 30px 100px 50px 50px;
+  gap: 8px;
+  padding: var(--hourly-row-padding-vertical) 0;
+  border-bottom: 1px solid var(--divider);
+  align-items: center;
+}
+
+.hourlyRow:last-child {
+  border-bottom: none;
+}
+
+.time {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.icon {
+  font-size: 16px;
+  text-align: center;
+}
+
+.condition {
+  font-size: 12px;
+  color: var(--text-label);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.temperature {
+  font-size: 14px;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.feelsLike {
+  font-size: 14px;
+  color: var(--accent-cold);
+  letter-spacing: 0.04em;
+  text-align: right;
+}
