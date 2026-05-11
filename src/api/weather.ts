@@ -1,4 +1,5 @@
 import type { WeatherApiResponse } from '../types/weather';
+import { CapacitorHttp } from '@capacitor/core';
 
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
 
@@ -53,8 +54,9 @@ export const fetchWeatherData = async (
   const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
   try {
-    const response = await fetch(`${WEATHER_API_URL}?${params}`, {
-      signal: controller.signal,
+    const response = await CapacitorHttp.request({
+      url: `${WEATHER_API_URL}?${params}`,
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -63,11 +65,11 @@ export const fetchWeatherData = async (
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      throw new Error(`Weather API error: ${response.status} ${response.statusText}`);
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`Weather API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = response.data;
     
     if (!validateWeatherResponse(data)) {
       throw new Error('Invalid weather API response structure');

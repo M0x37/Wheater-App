@@ -1,4 +1,5 @@
 import type { Location, GeocodingResult } from '../types/location';
+import { CapacitorHttp } from '@capacitor/core';
 
 const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
 
@@ -46,8 +47,9 @@ export const searchLocation = async (name: string): Promise<Location[]> => {
   const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
   try {
-    const response = await fetch(`${GEOCODING_API_URL}?${params}`, {
-      signal: controller.signal,
+    const response = await CapacitorHttp.request({
+      url: `${GEOCODING_API_URL}?${params}`,
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
@@ -56,11 +58,11 @@ export const searchLocation = async (name: string): Promise<Location[]> => {
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) {
-      throw new Error(`Geocoding API error: ${response.status} ${response.statusText}`);
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`Geocoding API error: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = response.data;
     
     if (!validateGeocodingResponse(data)) {
       throw new Error('Invalid geocoding API response structure');
