@@ -22,7 +22,10 @@ export const TimeOfDayGrid: React.FC<TimeOfDayGridProps> = ({ hourly, timezone }
       { label: 'NIGHT', hour: 2, periodEnd: 6 }
     ];
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = hourly.time[0]?.split('T')[0] ?? '';
+    const tomorrowDate = new Date(todayStr + 'T00:00:00');
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrowStr = tomorrowDate.toISOString().split('T')[0];
 
     return timeSlots.map(slot => {
       let dataIndex = 0;
@@ -33,10 +36,6 @@ export const TimeOfDayGrid: React.FC<TimeOfDayGridProps> = ({ hourly, timezone }
         const entryHour = new Date(hourly.time[i]).getHours();
 
         if (slot.label === 'NIGHT') {
-          // NIGHT data: look for the next night period (tomorrow early morning)
-          const tomorrow = new Date(todayStr);
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const tomorrowStr = tomorrow.toISOString().split('T')[0];
           if (entryDateStr === tomorrowStr) {
             const diff = Math.abs(entryHour - slot.hour);
             if (diff < bestDiff) {
