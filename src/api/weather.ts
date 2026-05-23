@@ -16,6 +16,7 @@ const validateWeatherResponse = (data: any): data is WeatherApiResponse => {
     typeof data.current.windspeed_10m === 'number' &&
     typeof data.current.apparent_temperature === 'number' &&
     typeof data.current.relative_humidity_2m === 'number' &&
+    (typeof data.current.time === 'string' || typeof data.current.time === 'undefined') &&
     data.hourly &&
     Array.isArray(data.hourly.time) &&
     Array.isArray(data.hourly.temperature_2m) &&
@@ -51,19 +52,33 @@ export const fetchWeatherData = async (
   });
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   try {
-    const response = await CapacitorHttp.request({
+    const requestPromise = CapacitorHttp.request({
       url: `${WEATHER_API_URL}?${params}`,
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+      connectTimeout: 10000,
+      readTimeout: 10000,
+      webFetchExtra: {
+        signal: controller.signal
       }
     });
 
-    clearTimeout(timeoutId);
+    const response = await Promise.race([
+      requestPromise,
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          controller.abort();
+          reject(new Error('Weather API request timeout'));
+        }, 10000);
+      })
+    ]);
+
+    requestPromise.catch(() => {});
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
 
     if (response.status < 200 || response.status >= 300) {
       throw new Error(`Weather API error: ${response.status}`);
@@ -77,7 +92,9 @@ export const fetchWeatherData = async (
     
     return data;
   } catch (error) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     if (error instanceof Error && error.name === 'AbortError') {
       throw new Error('Weather API request timeout');
     }

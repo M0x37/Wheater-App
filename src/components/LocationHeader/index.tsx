@@ -1,21 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Location } from '../../types/location';
-import { useLocationSearch } from '../../hooks/useLocationSearch';
 import { useDebounce } from '../../hooks/useDebounce';
 import { sanitizeText } from '../../utils/sanitize';
 import styles from './LocationHeader.module.css';
 
 interface LocationHeaderProps {
   location: Location | null;
+  searchQuery: string;
+  searchResults: Location[];
+  searchLoading: boolean;
+  error: string | null;
   onLocationChange: (location: Location) => void;
+  onSearch: (query: string) => Promise<void>;
+  clearSearch: () => void;
 }
 
-export const LocationHeader: React.FC<LocationHeaderProps> = ({ location, onLocationChange }) => {
+export const LocationHeader: React.FC<LocationHeaderProps> = ({
+  location,
+  searchQuery,
+  searchResults,
+  searchLoading,
+  error,
+  onLocationChange,
+  onSearch,
+  clearSearch
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const { search, searchResults, loading: searchLoading } = useLocationSearch();
   const inputRef = useRef<HTMLInputElement>(null);
-  
   const debouncedInputValue = useDebounce(inputValue, 300);
 
   useEffect(() => {
@@ -26,19 +38,19 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({ location, onLoca
 
   useEffect(() => {
     if (isEditing) {
-      search(debouncedInputValue);
+      onSearch(debouncedInputValue);
     }
-  }, [debouncedInputValue, isEditing, search]);
+  }, [debouncedInputValue, isEditing, onSearch]);
 
   const handleEdit = () => {
-    setInputValue(location?.name || '');
+    setInputValue(searchQuery || location?.name || '');
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setInputValue('');
-    search('');
+    clearSearch();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +62,7 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({ location, onLoca
     onLocationChange(selectedLocation);
     setIsEditing(false);
     setInputValue('');
-    search('');
+    clearSearch();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -74,6 +86,9 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({ location, onLoca
         {searchLoading && (
           <div className={styles.searchStatus}>SEARCHING...</div>
         )}
+        {error && !searchLoading && (
+          <div className={styles.searchStatus}>{sanitizeText(error)}</div>
+        )}
         {searchResults.length > 0 && (
           <div className={styles.searchResults}>
             {searchResults.map((result, index) => (
@@ -86,14 +101,17 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({ location, onLoca
                 <div className={styles.resultName}>{sanitizeText(result.name)}</div>
                 {(result.admin1 || result.country) && (
                   <div className={styles.resultDetails}>
-                    {[result.admin1, result.country].filter(Boolean).map(text => sanitizeText(text || '')).join(', ')}
+                    {[result.admin1, result.country]
+                      .filter(Boolean)
+                      .map(text => sanitizeText(text || ''))
+                      .join(', ')}
                   </div>
                 )}
               </button>
             ))}
           </div>
         )}
-        {!searchLoading && inputValue && searchResults.length === 0 && (
+        {!searchLoading && inputValue && searchResults.length === 0 && !error && (
           <div className={styles.searchStatus}>NO RESULTS FOUND</div>
         )}
       </div>

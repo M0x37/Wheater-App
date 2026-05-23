@@ -6,8 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    cleartext: true,
-    allowNavigation: ['*']
+    cleartext: false,
+    allowNavigation: ['https://api.open-meteo.com', 'https://geocoding-api.open-meteo.com']
   }
 };
 

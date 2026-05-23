@@ -34,6 +34,7 @@ interface UseLocationSearchState {
   searchQuery: string;
   searchResults: Location[];
   loading: boolean;
+  searchLoading: boolean;
   error: string | null;
 }
 
@@ -43,6 +44,7 @@ export const useLocationSearch = () => {
     searchQuery: '',
     searchResults: [],
     loading: true,
+    searchLoading: false,
     error: null
   });
 
@@ -60,6 +62,8 @@ export const useLocationSearch = () => {
                 setState(prev => ({
                   ...prev,
                   location: parsedLocation,
+                  searchQuery: parsedLocation.name,
+                  searchResults: [],
                   loading: false
                 }));
                 return;
@@ -75,6 +79,8 @@ export const useLocationSearch = () => {
         setState(prev => ({
           ...prev,
           location: defaultLocation,
+          searchQuery: defaultLocation.name,
+          searchResults: [],
           loading: false
         }));
       } catch (err) {
@@ -84,6 +90,8 @@ export const useLocationSearch = () => {
           setState(prev => ({
             ...prev,
             location: defaultLocation,
+            searchQuery: defaultLocation.name,
+            searchResults: [],
             loading: false,
             error: 'Failed to load saved location'
           }));
@@ -110,6 +118,7 @@ export const useLocationSearch = () => {
         location,
         searchQuery: location.name,
         searchResults: [],
+        searchLoading: false,
         error: null
       }));
     } catch (err) {
@@ -125,7 +134,9 @@ export const useLocationSearch = () => {
       setState(prev => ({
         ...prev,
         searchQuery: query,
-        searchResults: []
+        searchResults: [],
+        searchLoading: false,
+        error: null
       }));
       return;
     }
@@ -133,7 +144,7 @@ export const useLocationSearch = () => {
     setState(prev => ({
       ...prev,
       searchQuery: query,
-      loading: true,
+      searchLoading: true,
       error: null
     }));
 
@@ -142,13 +153,13 @@ export const useLocationSearch = () => {
       setState(prev => ({
         ...prev,
         searchResults: results,
-        loading: false
+        searchLoading: false
       }));
     } catch (err) {
       setState(prev => ({
         ...prev,
         searchResults: [],
-        loading: false,
+        searchLoading: false,
         error: err instanceof Error ? err.message : 'Search failed'
       }));
     }
@@ -158,7 +169,9 @@ export const useLocationSearch = () => {
     setState(prev => ({
       ...prev,
       searchQuery: '',
-      searchResults: []
+      searchResults: [],
+      searchLoading: false,
+      error: null
     }));
   }, []);
 

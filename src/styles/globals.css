@@ -191,9 +191,9 @@ body {
 
 /* Loading and error states */
 .loading-text,
-.error-text {
+.error-text,
+.warning-text {
   font-size: 14px;
-  color: var(--text-dim);
   letter-spacing: 0.05em;
   text-align: center;
   padding: 40px 0;
@@ -201,4 +201,47 @@ body {
 
 .error-text {
   color: var(--accent-warm);
+}
+
+.warning-text {
+  color: var(--accent-cold);
+  padding: 12px 0 0;
+}
+
+.geo-locate-button {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+  z-index: 20;
+}
+
+.geo-locate-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.geo-locate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.geo-locate-button:disabled:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.geo-locate-button svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-primary);
 }

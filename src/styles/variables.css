@@ -5,11 +5,11 @@
   --divider: #111111;
   
   --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --text-muted: #888888;
-  --text-dim: #555555;
-  --text-very-dim: #333333;
-  --text-label: #444444;
+  --text-secondary: #f0f0f0;
+  --text-muted: #d0d0d0;
+  --text-dim: #b0b0b0;
+  --text-very-dim: #8a8a8a;
+  --text-label: #b8b8b8;
   
   --accent-cold: #3d7acc;
   --accent-warm: #ff6b4a;
