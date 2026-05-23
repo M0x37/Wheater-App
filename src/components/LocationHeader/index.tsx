@@ -27,6 +27,7 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedInputValue = useDebounce(inputValue, 300);
 
@@ -38,12 +39,15 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({
 
   useEffect(() => {
     if (isEditing) {
-      onSearch(debouncedInputValue);
+      onSearch(debouncedInputValue).then(() => {
+        setHasSearched(true);
+      });
     }
   }, [debouncedInputValue, isEditing, onSearch]);
 
   const handleEdit = () => {
     setInputValue(searchQuery || location?.name || '');
+    setHasSearched(false);
     setIsEditing(true);
   };
 
@@ -56,6 +60,7 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = sanitizeText(e.target.value);
     setInputValue(value);
+    setHasSearched(false);
   };
 
   const handleLocationSelect = (selectedLocation: Location) => {
@@ -111,7 +116,7 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({
             ))}
           </div>
         )}
-        {!searchLoading && inputValue && searchResults.length === 0 && !error && (
+        {!searchLoading && hasSearched && inputValue && searchResults.length === 0 && !error && (
           <div className={styles.searchStatus}>NO RESULTS FOUND</div>
         )}
       </div>

@@ -11,36 +11,57 @@ interface TimeOfDayGridProps {
 }
 
 export const TimeOfDayGrid: React.FC<TimeOfDayGridProps> = ({ hourly, timezone }) => {
-  const currentHour = getCurrentHour();
+  const currentHour = getCurrentHour(timezone);
   
   // Get 4 time periods: morning (6-12), afternoon (12-17), evening (17-22), night (22-6)
   const getTimeSlots = () => {
     const timeSlots = [
-      { label: 'MORNING', hour: 9 },    // Middle of 6-12 period
-      { label: 'AFTERNOON', hour: 14 }, // Middle of 12-17 period
-      { label: 'EVENING', hour: 19 },   // Middle of 17-22 period
-      { label: 'NIGHT', hour: 2 }       // Middle of 22-6 period
+      { label: 'MORNING', hour: 9, periodEnd: 12 },
+      { label: 'AFTERNOON', hour: 14, periodEnd: 17 },
+      { label: 'EVENING', hour: 19, periodEnd: 22 },
+      { label: 'NIGHT', hour: 2, periodEnd: 6 }
     ];
 
-    return timeSlots.map(slot => {
-      // Find the closest hourly data to the target hour
-      const targetIndex = hourly.time.findIndex(time => {
-        const hour = new Date(time).getHours();
-        return hour === slot.hour;
-      });
+    const todayStr = new Date().toISOString().split('T')[0];
 
-      let dataIndex = targetIndex;
-      if (dataIndex === -1) {
-        // If exact hour not found, find the closest one
-        dataIndex = hourly.time.reduce((closestIndex, time, index) => {
-          const hour = new Date(time).getHours();
-          const currentDiff = Math.abs(hour - slot.hour);
-          const closestDiff = Math.abs(new Date(hourly.time[closestIndex]).getHours() - slot.hour);
-          return currentDiff < closestDiff ? index : closestIndex;
-        }, 0);
+    return timeSlots.map(slot => {
+      let dataIndex = 0;
+      let bestDiff = Infinity;
+
+      for (let i = 0; i < hourly.time.length; i++) {
+        const entryDateStr = hourly.time[i].split('T')[0];
+        const entryHour = new Date(hourly.time[i]).getHours();
+
+        if (slot.label === 'NIGHT') {
+          // NIGHT data: look for the next night period (tomorrow early morning)
+          const tomorrow = new Date(todayStr);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = tomorrow.toISOString().split('T')[0];
+          if (entryDateStr === tomorrowStr) {
+            const diff = Math.abs(entryHour - slot.hour);
+            if (diff < bestDiff) {
+              bestDiff = diff;
+              dataIndex = i;
+            }
+          }
+        } else {
+          if (entryDateStr !== todayStr) continue;
+          const diff = Math.abs(entryHour - slot.hour);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            dataIndex = i;
+          }
+        }
       }
 
-      const isPast = slot.hour < currentHour && !(slot.hour === 0 && currentHour >= 0);
+      let isPast: boolean;
+      if (slot.label === 'NIGHT') {
+        // NIGHT (22-6) is past only if we're already past 6 AM the next day,
+        // which can't happen for "today's" view, so it's never past.
+        isPast = currentHour >= slot.periodEnd && currentHour < 22;
+      } else {
+        isPast = currentHour >= slot.periodEnd;
+      }
       const isNight = isNightTime(slot.hour);
 
       return {

@@ -10,25 +10,45 @@ interface HourlyRowProps {
 }
 
 export const HourlyRow: React.FC<HourlyRowProps> = ({ hourly, timezone }) => {
-  // Get specific hours for today's forecast: 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00
   const targetHours = [6, 9, 12, 15, 18, 21, 0];
   
   const getHourlyData = () => {
-    return targetHours.map(targetHour => {
-      // Find the data point closest to the target hour
-      const closestIndex = hourly.time.reduce((closestIndex, time, index) => {
-        const hour = new Date(time).getHours();
-        const currentDiff = Math.abs(hour - targetHour);
-        const closestDiff = Math.abs(new Date(hourly.time[closestIndex]).getHours() - targetHour);
-        return currentDiff < closestDiff ? index : closestIndex;
-      }, 0);
+    const todayStr = new Date().toISOString().split('T')[0];
 
-      const weather = getWeatherCode(hourly.weathercode[closestIndex]);
+    return targetHours.map(targetHour => {
+      let bestIndex = 0;
+      let bestDiff = Infinity;
+
+      for (let i = 0; i < hourly.time.length; i++) {
+        const entryDate = new Date(hourly.time[i]);
+        const entryDateStr = hourly.time[i].split('T')[0];
+        const entryHour = entryDate.getHours();
+
+        if (targetHour === 0) {
+          // For midnight, look for 00:00 on the day after today
+          const tomorrow = new Date(todayStr);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          const tomorrowStr = tomorrow.toISOString().split('T')[0];
+          if (entryDateStr === tomorrowStr && entryHour === 0) {
+            bestIndex = i;
+            break;
+          }
+        } else {
+          if (entryDateStr !== todayStr) continue;
+          const diff = Math.abs(entryHour - targetHour);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestIndex = i;
+          }
+        }
+      }
+
+      const weather = getWeatherCode(hourly.weathercode[bestIndex]);
       
       return {
-        time: formatHour(hourly.time[closestIndex], timezone),
-        temperature: formatTemperature(hourly.temperature_2m[closestIndex]),
-        feelsLike: formatTemperature(hourly.apparent_temperature[closestIndex]),
+        time: formatHour(hourly.time[bestIndex], timezone),
+        temperature: formatTemperature(hourly.temperature_2m[bestIndex]),
+        feelsLike: formatTemperature(hourly.apparent_temperature[bestIndex]),
         condition: weather.label,
         icon: weather.icon
       };

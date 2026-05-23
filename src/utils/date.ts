@@ -1,17 +1,16 @@
-export const getCurrentHour = (): number => {
+export const getCurrentHour = (timezone?: string): number => {
+  if (timezone) {
+    try {
+      const hour = parseInt(
+        new Date().toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: timezone }),
+        10
+      );
+      return hour === 24 ? 0 : hour;
+    } catch {
+      // Fall back to local time if timezone is invalid
+    }
+  }
   return new Date().getHours();
-};
-
-export const getTodayDateString = (): string => {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
-};
-
-export const isToday = (dateString: string): boolean => {
-  const today = getTodayDateString();
-  const date = new Date(dateString);
-  const dateStr = date.toISOString().split('T')[0];
-  return today === dateStr;
 };
 
 export const isNightTime = (hour: number): boolean => {
