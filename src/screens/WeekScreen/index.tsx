@@ -7,7 +7,7 @@ interface WeekScreenProps {
   weatherData: WeatherData;
 }
 
-export const WeekScreen: React.FC<WeekScreenProps> = ({ weatherData }) => {
+const WeekScreen: React.FC<WeekScreenProps> = ({ weatherData }) => {
   return (
     <div className={styles.weekScreen}>
       <div className={styles.sectionHeader}>7 DAY FORECAST</div>
@@ -15,3 +15,5 @@ export const WeekScreen: React.FC<WeekScreenProps> = ({ weatherData }) => {
     </div>
   );
 };
+
+export default WeekScreen;

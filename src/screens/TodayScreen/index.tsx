@@ -7,7 +7,7 @@ interface TodayScreenProps {
   weatherData: WeatherData;
 }
 
-export const TodayScreen: React.FC<TodayScreenProps> = ({ weatherData }) => {
+const TodayScreen: React.FC<TodayScreenProps> = ({ weatherData }) => {
   return (
     <div className={styles.todayScreen}>
       <div className={styles.sectionHeader}>TODAY'S FORECAST</div>
@@ -15,3 +15,5 @@ export const TodayScreen: React.FC<TodayScreenProps> = ({ weatherData }) => {
     </div>
   );
 };
+
+export default TodayScreen;

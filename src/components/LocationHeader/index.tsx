@@ -15,7 +15,7 @@ interface LocationHeaderProps {
   clearSearch: () => void;
 }
 
-export const LocationHeader: React.FC<LocationHeaderProps> = ({
+export const LocationHeader: React.FC<LocationHeaderProps> = React.memo(({
   location,
   searchQuery,
   searchResults,
@@ -134,4 +134,4 @@ export const LocationHeader: React.FC<LocationHeaderProps> = ({
       </button>
     </div>
   );
-};
+});

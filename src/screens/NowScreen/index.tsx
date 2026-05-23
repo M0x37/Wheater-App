@@ -10,7 +10,7 @@ interface NowScreenProps {
   weatherData: WeatherData;
 }
 
-export const NowScreen: React.FC<NowScreenProps> = ({ weatherData }) => {
+const NowScreen: React.FC<NowScreenProps> = ({ weatherData }) => {
   const { current } = weatherData;
   const weather = getWeatherCode(current.weathercode);
 
@@ -28,3 +28,5 @@ export const NowScreen: React.FC<NowScreenProps> = ({ weatherData }) => {
     </div>
   );
 };
+
+export default NowScreen;

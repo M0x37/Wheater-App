@@ -7,7 +7,7 @@ interface NavBarProps {
   onTabChange: (tab: TabType) => void;
 }
 
-export const NavBar: React.FC<NavBarProps> = ({ activeTab, onTabChange }) => {
+export const NavBar: React.FC<NavBarProps> = React.memo(({ activeTab, onTabChange }) => {
   return (
     <nav className={styles.nav}>
       <button
@@ -33,4 +33,4 @@ export const NavBar: React.FC<NavBarProps> = ({ activeTab, onTabChange }) => {
       </button>
     </nav>
   );
-};
+});

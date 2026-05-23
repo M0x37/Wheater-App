@@ -2,6 +2,8 @@ import type { WeatherApiResponse } from '../types/weather';
 import { CapacitorHttp } from '@capacitor/core';
 
 const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast';
+const RATE_LIMIT_MS = 500;
+let lastRequestTime = 0;
 
 const validateWeatherResponse = (data: any): data is WeatherApiResponse => {
   return (
@@ -35,10 +37,15 @@ export const fetchWeatherData = async (
   latitude: number,
   longitude: number
 ): Promise<WeatherApiResponse> => {
-  // Validate coordinates
+  const now = Date.now();
+  if (now - lastRequestTime < RATE_LIMIT_MS) {
+    throw new Error('Too many requests. Please try again later.');
+  }
+  lastRequestTime = now;
+
   if (typeof latitude !== 'number' || typeof longitude !== 'number' ||
       latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
-    throw new Error('Invalid coordinates provided');
+    throw new Error('Invalid coordinates');
   }
 
   const params = new URLSearchParams({
@@ -58,8 +65,8 @@ export const fetchWeatherData = async (
     const requestPromise = CapacitorHttp.request({
       url: `${WEATHER_API_URL}?${params}`,
       method: 'GET',
-      connectTimeout: 10000,
-      readTimeout: 10000,
+      connectTimeout: 7000,
+      readTimeout: 7000,
       webFetchExtra: {
         signal: controller.signal
       }
@@ -71,7 +78,7 @@ export const fetchWeatherData = async (
         timeoutId = setTimeout(() => {
           controller.abort();
           reject(new Error('Weather API request timeout'));
-        }, 10000);
+        }, 7000);
       })
     ]);
 
@@ -81,13 +88,13 @@ export const fetchWeatherData = async (
     }
 
     if (response.status < 200 || response.status >= 300) {
-      throw new Error(`Weather API error: ${response.status}`);
+      throw new Error('API request failed');
     }
 
     const data = response.data;
     
     if (!validateWeatherResponse(data)) {
-      throw new Error('Invalid weather API response structure');
+      throw new Error('Invalid response');
     }
     
     return data;
@@ -96,9 +103,9 @@ export const fetchWeatherData = async (
       clearTimeout(timeoutId);
     }
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Weather API request timeout');
+      throw new Error('Request timeout');
     }
-    throw error instanceof Error ? error : new Error('Unknown error occurred');
+    throw error instanceof Error ? error : new Error('Request failed');
   }
 };
 

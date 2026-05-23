@@ -3,6 +3,8 @@ import { CapacitorHttp, Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 
 const GEOCODING_API_URL = 'https://geocoding-api.open-meteo.com/v1/search';
+const RATE_LIMIT_MS = 500;
+let lastRequestTime = 0;
 
 const validateGeocodingResponse = (data: any): data is GeocodingResult => {
   return (
@@ -28,17 +30,23 @@ const validateLocation = (location: any): location is Location => {
 };
 
 export const searchLocation = async (name: string): Promise<Location[]> => {
-  // Validate input
+  const now = Date.now();
+  if (now - lastRequestTime < RATE_LIMIT_MS) {
+    throw new Error('Too many requests. Please try again later.');
+  }
+  lastRequestTime = now;
+
   if (typeof name !== 'string' || name.trim().length === 0) {
-    throw new Error('Invalid location name provided');
+    throw new Error('Invalid input');
   }
   
   if (name.trim().length > 100) {
-    throw new Error('Location name too long');
+    throw new Error('Input too long');
   }
 
+  const sanitizedName = name.trim().substring(0, 100).replace(/[<>"']/g, '');
   const params = new URLSearchParams({
-    name: name.trim().substring(0, 100),
+    name: sanitizedName,
     count: '10',
     language: 'en',
     format: 'json'
@@ -51,8 +59,8 @@ export const searchLocation = async (name: string): Promise<Location[]> => {
     const requestPromise = CapacitorHttp.request({
       url: `${GEOCODING_API_URL}?${params}`,
       method: 'GET',
-      connectTimeout: 8000,
-      readTimeout: 8000,
+      connectTimeout: 5000,
+      readTimeout: 5000,
       webFetchExtra: {
         signal: controller.signal
       }
@@ -64,7 +72,7 @@ export const searchLocation = async (name: string): Promise<Location[]> => {
         timeoutId = setTimeout(() => {
           controller.abort();
           reject(new Error('Geocoding API request timeout'));
-        }, 8000);
+        }, 5000);
       })
     ]);
 
@@ -74,13 +82,13 @@ export const searchLocation = async (name: string): Promise<Location[]> => {
     }
 
     if (response.status < 200 || response.status >= 300) {
-      throw new Error(`Geocoding API error: ${response.status}`);
+      throw new Error('API request failed');
     }
 
     const data = response.data;
     
     if (!validateGeocodingResponse(data)) {
-      throw new Error('Invalid geocoding API response structure');
+      throw new Error('Invalid response');
     }
     
     if (!data.results) {
@@ -93,9 +101,9 @@ export const searchLocation = async (name: string): Promise<Location[]> => {
       clearTimeout(timeoutId);
     }
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Geocoding API request timeout');
+      throw new Error('Request timeout');
     }
-    throw error instanceof Error ? error : new Error('Unknown error occurred');
+    throw error instanceof Error ? error : new Error('Request failed');
   }
 };
 
@@ -134,9 +142,6 @@ export const reverseGeocode = async (latitude: number, longitude: number): Promi
       method: 'GET',
       connectTimeout: 8000,
       readTimeout: 8000,
-      headers: {
-        'User-Agent': 'WeatherApp/1.0'
-      },
       webFetchExtra: {
         signal: controller.signal
       }
@@ -148,7 +153,7 @@ export const reverseGeocode = async (latitude: number, longitude: number): Promi
         timeoutId = setTimeout(() => {
           controller.abort();
           reject(new Error('Reverse geocoding request timeout'));
-        }, 8000);
+        }, 5000);
       })
     ]);
 
@@ -261,7 +266,7 @@ export const getDeviceCoordinates = async (): Promise<{ latitude: number; longit
       if (error instanceof Error && error.message === 'Invalid coordinates received from device') {
         throw error;
       }
-      throw error instanceof Error ? error : new Error('Failed to access device geolocation');
+      throw new Error('Geolocation failed');
     }
   }
 

@@ -166,7 +166,7 @@ export const useLocationSearch = () => {
         ...prev,
         searchResults: [],
         searchLoading: false,
-        error: err instanceof Error ? err.message : 'Search failed'
+        error: 'Search failed'
       }));
     }
   }, []);

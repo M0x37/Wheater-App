@@ -3,7 +3,7 @@ import type { WeatherData } from '../types/weather';
 import { fetchWeatherData, normalizeWeatherData } from '../api/weather';
 
 const CACHE_KEY_PREFIX = 'weather-cache';
-const CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutes
+const CACHE_TTL_MS = 1000 * 60 * 15; // 15 minutes for fresher data
 
 const isValidCoordinate = (lat: number, lon: number): boolean => {
   return (
@@ -164,9 +164,7 @@ export const useWeather = (latitude?: number, longitude?: number) => {
           data: cachedDataFallback,
           loading: false,
           error: null,
-          warning: err instanceof Error
-            ? `${err.message}. Displaying cached weather data.`
-            : 'Failed to fetch weather data. Displaying cached weather data.'
+          warning: 'Displaying cached data'
         });
         return;
       }
@@ -174,7 +172,7 @@ export const useWeather = (latitude?: number, longitude?: number) => {
       setState({
         data: null,
         loading: false,
-        error: err instanceof Error ? err.message : 'Failed to fetch weather data',
+        error: 'Failed to fetch weather data',
         warning: null
       });
     }
