@@ -83,12 +83,38 @@ const saveCachedWeather = (latitude: number, longitude: number, data: WeatherDat
   }
 
   try {
+    cleanExpiredCacheEntries();
     localStorage.setItem(
       getCacheKey(latitude, longitude),
       JSON.stringify({ timestamp: Date.now(), data })
     );
   } catch {
     // Ignore localStorage failures silently.
+  }
+};
+
+const cleanExpiredCacheEntries = () => {
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(CACHE_KEY_PREFIX)) continue;
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.timestamp === 'number' && Date.now() - parsed.timestamp > CACHE_TTL_MS) {
+          keysToRemove.push(key);
+        }
+      } catch {
+        keysToRemove.push(key);
+      }
+    }
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key);
+    }
+  } catch {
+    // Ignore cleanup failures
   }
 };
 

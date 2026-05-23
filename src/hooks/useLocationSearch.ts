@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Location } from '../types/location';
 import { searchLocation, getDefaultLocation } from '../api/geocoding';
 
@@ -129,7 +129,11 @@ export const useLocationSearch = () => {
     }
   }, []);
 
+  const searchSeqRef = useRef(0);
+
   const search = useCallback(async (query: string) => {
+    const seq = ++searchSeqRef.current;
+
     if (!query.trim()) {
       setState(prev => ({
         ...prev,
@@ -150,12 +154,14 @@ export const useLocationSearch = () => {
 
     try {
       const results = await searchLocation(query);
+      if (seq !== searchSeqRef.current) return;
       setState(prev => ({
         ...prev,
         searchResults: results,
         searchLoading: false
       }));
     } catch (err) {
+      if (seq !== searchSeqRef.current) return;
       setState(prev => ({
         ...prev,
         searchResults: [],

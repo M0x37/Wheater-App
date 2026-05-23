@@ -40,7 +40,13 @@ const App: React.FC = () => {
 
     try {
       const { latitude, longitude } = await getDeviceCoordinates();
-      const deviceLocation = await reverseGeocode(latitude, longitude);
+
+      let deviceLocation: Location | null = null;
+      try {
+        deviceLocation = await reverseGeocode(latitude, longitude);
+      } catch {
+        // Reverse geocoding failed; fall through to use coordinates only
+      }
 
       if (deviceLocation) {
         saveLocation(deviceLocation);

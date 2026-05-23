@@ -4,7 +4,7 @@ export interface CurrentWeather {
   windspeed_10m: number;
   apparent_temperature: number;
   relative_humidity_2m: number;
-  time: string;
+  time?: string;
 }
 
 export interface HourlyWeather {

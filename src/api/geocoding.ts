@@ -117,24 +117,26 @@ export const getDefaultLocation = async (): Promise<Location> => {
 };
 
 export const reverseGeocode = async (latitude: number, longitude: number): Promise<Location | null> => {
+  const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/reverse';
   const params = new URLSearchParams({
-    latitude: latitude.toString(),
-    longitude: longitude.toString(),
-    count: '1',
-    language: 'en',
-    format: 'json'
+    lat: latitude.toString(),
+    lon: longitude.toString(),
+    format: 'json',
+    zoom: '10'
   });
 
-  const reverseUrl = GEOCODING_API_URL.replace('/search', '/reverse');
   const controller = new AbortController();
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   try {
     const requestPromise = CapacitorHttp.request({
-      url: `${reverseUrl}?${params}`,
+      url: `${NOMINATIM_URL}?${params}`,
       method: 'GET',
       connectTimeout: 8000,
       readTimeout: 8000,
+      headers: {
+        'User-Agent': 'WeatherApp/1.0'
+      },
       webFetchExtra: {
         signal: controller.signal
       }
@@ -156,28 +158,30 @@ export const reverseGeocode = async (latitude: number, longitude: number): Promi
     }
 
     if (response.status < 200 || response.status >= 300) {
-      throw new Error(`Reverse geocoding API error: ${response.status}`);
-    }
-
-    const data = response.data;
-    if (!validateGeocodingResponse(data)) {
-      throw new Error('Invalid reverse geocoding API response structure');
-    }
-
-    if (!data.results || data.results.length === 0) {
       return null;
     }
 
-    const location = data.results[0];
+    const data = response.data;
+    if (!data || typeof data !== 'object') {
+      return null;
+    }
+
+    const name = data.address?.city || data.address?.town || data.address?.village || data.name;
+    if (typeof name !== 'string' || name.length === 0) {
+      return null;
+    }
+
+    const location: Location = {
+      name,
+      latitude,
+      longitude,
+      country: typeof data.address?.country === 'string' ? data.address.country : undefined,
+      admin1: typeof data.address?.state === 'string' ? data.address.state : undefined
+    };
+
     return validateLocation(location) ? location : null;
-  } catch (error) {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Reverse geocoding request timeout');
-    }
-    throw error instanceof Error ? error : new Error('Unknown reverse geocoding error');
+  } catch {
+    return null;
   }
 };
 
@@ -217,7 +221,9 @@ const requestNativeLocationPermission = async (): Promise<void> => {
 };
 
 export const getDeviceCoordinates = async (): Promise<{ latitude: number; longitude: number }> => {
-  if (!isNativePlatform() && typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+  const native = isNativePlatform();
+
+  if (!native && typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'geolocation' in navigator) {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         position => {
@@ -237,7 +243,7 @@ export const getDeviceCoordinates = async (): Promise<{ latitude: number; longit
     });
   }
 
-  if (isNativePlatform()) {
+  if (native) {
     try {
       await requestNativeLocationPermission();
       const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });

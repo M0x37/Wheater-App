@@ -16,14 +16,3 @@ export const getFeelsLikeDescription = (actual: number, feelsLike: number): stri
   if (diff > -6) return 'FEELS COLDER';
   return 'FEELS MUCH COLDER';
 };
-
-export const getTemperatureTrend = (temps: number[]): 'rising' | 'falling' | 'stable' => {
-  if (temps.length < 2) return 'stable';
-  
-  const recent = temps.slice(-3);
-  const avgChange = (recent[recent.length - 1] - recent[0]) / (recent.length - 1);
-  
-  if (avgChange > 1) return 'rising';
-  if (avgChange < -1) return 'falling';
-  return 'stable';
-};
