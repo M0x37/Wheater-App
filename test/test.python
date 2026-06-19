@@ -1,0 +1,92 @@
+import pandas as pd
+
+# 1. Die Vokabeldaten (extrahiert aus deinen Bildern)
+# Format: [Französisch, Grammatik-Info, Deutsch, Beispielsatz/Notiz]
+vocab_data = [
+    # Seite 183
+    ["l'office de tourisme", "m.", "die Touristeninformation", "A l'office de tourisme, les touristes trouvent plein d'informations sur eine ville."],
+    ["le théâtre", "", "das Theater", ""],
+    ["un renseignement", "", "eine Auskunft", ""],
+    ["un plan de la ville", "", "ein Stadtplan", ""],
+    ["une adresse", "", "eine Adresse", "Vous avez l'adresse de l'hôtel?"],
+    ["les horaires d'ouverture", "m. pl.", "die Öffnungszeiten", "Vous connaissez les horaires d'ouverture du palais des Papes?"],
+    ["une chambre d'hôtel", "", "ein Hotelzimmer", "Nous cherchons une chambre d'hôtel à Avignon."],
+    ["je me renseigne.", "", "Ich erkundige mich.", ""],
+    ["un prospectus", "", "ein Prospekt", "Est-ce que vous avez un prospectus sur les musées de la ville?"],
+    ["le menu du jour", "", "das Tagesmenü", ""],
+    ["complètement", "", "vollständig", "Ma vie a complètement changé."],
+    ["déménager", "", "umziehen", "J'ai déménagé. 'déménager' wird konjugiert wie 'manger'."],
+    ["ouvrir", "", "öffnen; eröffnen", "Ma mère a ouvert un restaurant."],
+    ["le compagnon / la compagne", "", "der Lebenspartner / die Lebenspartnerin", ""],
+    ["une entrée", "", "hier: eine Vorspeise", "En entrée, je prends ..."],
+    ["comme plat principal", "", "als Hauptgericht", "Qu'est-ce qu'il y a comme plat principal?"],
+    ["le poisson", "", "der Fisch", ""],
+    ["la ratatouille", "", "südfranzösisches Gemüsegericht", ""],
+    ["la viande", "", "das Fleisch", "Tu as acheté de la viande?"],
+    ["un steak", "", "ein Steak", "J'aime le steak avec des pommes de terre."],
+    ["servir", "", "servieren", ""],
+    ["les pommes de terre au four", "f.", "die Ofenkartoffeln", ""],
+    ["une pomme de terre", "", "eine Kartoffel", ""],
+    ["un dessert", "", "ein Nachtisch", ""],
+    ["une crème brûlée", "", "im Ofen gebräunte Milch-Eier-Nachspeise", ""],
+    ["une boule de glace", "", "eine Kugel Eis", ""],
+    ["stresser", "", "nerven", ""],
+
+    # Seite 184
+    ["un coup de téléphone", "", "ein Anruf", ""],
+    ["Elle n'a personne pour le remplacer.", "", "Sie hat keinen Ersatz für ihn.", ""],
+    ["ne ... personne", "", "niemand", "Il n'y a personne au restaurant."],
+    ["remplacer", "", "ersetzen", "Le serveur est malade. Est-ce que tu peux le remplacer?"],
+    ["plein / pleine", "", "voll", "Le carnet est plein."],
+    ["l'aide", "f.", "die Hilfe", ""],
+    ["il / elle accueille", "", "er/sie empfängt; hier: er/sie begrüßt", "Julie accueille les clients."],
+    ["un client / une cliente", "", "ein Kunde / eine Kundin", ""],
+    ["réserver", "", "reservieren", "J'ai réservé eine table au nom de ..."],
+    ["une fenêtre", "", "ein Fenster", "Tu peux ouvrir la fenêtre, s'il te plaît?"],
+    ["la carte", "", "die Speisekarte", ""],
+    ["choisir", "", "wählen; aussuchen", ""],
+    ["peu à peu", "", "nach und nach", ""],
+    ["d'autres clients", "", "andere Kunden", "D'autres clients arrivent."],
+    ["une terrasse", "", "eine Terrasse", "une table en terrasse"],
+    ["d'ailleurs", "", "übrigens", ""],
+    ["La table est réservée.", "", "Der Tisch ist reserviert.", "Désolé. Cette table est déjà réservée."],
+    ["on voudrait", "", "wir möchten", ""],
+    ["le plat du jour", "", "das Tagesessen; das Tagesgericht", "Quel est le plat du jour?"],
+    ["un poulet", "", "ein Huhn; ein Hähnchen", ""],
+    ["ajouter", "", "hinzufügen", "Il faut ajouter eine chaise à la table 11."],
+    ["un couvert", "", "ein Gedeck", "Un couvert: un couteau, une fourchette, un verre, une serviette."],
+    ["une solution", "", "eine Lösung", "Quelle est la solution du problème?"],
+    ["un cuisinier / une cuisinière", "", "ein Koch / eine Köchin", ""],
+    ["une demi-heure", "", "eine halbe Stunde", ""],
+    ["une réservation", "", "eine Reservierung", ""],
+    ["un couple", "", "ein Paar; ein Ehepaar", ""],
+    ["Vous avez choisi, messieurs dames?", "", "Haben die Herrschaften gewählt?", ""],
+    ["Tout à fait.", "", "Ganz recht.", ""],
+    ["sans", "", "ohne", ""],
+    ["une salade de tomates", "", "ein Tomatensalat", ""],
+    ["une vinaigrette", "", "Salatsoße mit Essig und Öl", ""],
+    ["à la place de", "", "anstelle von", ""],
+
+    # ... hier würden die restlichen Vokabeln der Seiten 185-187 folgen ...
+]
+
+# 2. Vorlage laden
+# Wir laden die Datei ohne Header, um die ersten Zeilen der Vorlage exakt zu behalten
+try:
+    df_template = pd.read_excel('vokabelBoxVorlage.xlsx', header=None)
+    
+    # 3. Neue Vokabeln in ein DataFrame umwandeln
+    df_vocab = pd.DataFrame(vocab_data)
+    
+    # 4. Vorlage und Vokabeln zusammenfügen
+    # Die Vokabeln werden einfach unter die Kopfzeilen der Vorlage gehängt
+    df_final = pd.concat([df_template, df_vocab], ignore_index=True)
+    
+    # 5. Speichern
+    output_name = "vokabeln_vokabelbox_neu.xlsx"
+    df_final.to_excel(output_name, index=False, header=False)
+    
+    print(f"Datei '{output_name}' wurde erfolgreich erstellt!")
+
+except FileNotFoundError:
+    print("Fehler: Die Datei 'vokabelBoxVorlage.xlsx' wurde nicht gefunden.")
